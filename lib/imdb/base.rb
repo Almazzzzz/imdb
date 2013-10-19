@@ -60,6 +60,10 @@ module Imdb
       document.search("h5[text()^='Director'] ~ div a").map { |link| link['href'].sub(%r{^/name/(.*)/}) } rescue []
     end
     
+    def director_id
+      document.search("h5[text()^='Director'] ~ div a").map { |link| link['href'].sub(%r{^/name/(.*)/}, '\1') } rescue []
+    end
+    
     # Returns the url to the "Watch a trailer" page
     def trailer_url
       'http://imdb.com' + document.at("a[@href*='/video/screenplay/']")['href'] rescue nil
