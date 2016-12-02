@@ -45,6 +45,10 @@ module Imdb
       document.search("h5[text()^='Director'] ~ div a").map { |link| link.content.strip } rescue []
     end
 
+    def director_id
+      document.search("h5[text()^='Director'] ~ div a").map { |link| link['href'].sub(%r{^/name/(.*)/}, '\1') } rescue []
+    end
+
     # Returns the names of Writers
     def writers
       writers_list = []
@@ -110,9 +114,9 @@ module Imdb
     def poster
       src = document.at("a[@name='poster'] img")['src'] rescue nil
       case src
-      when /^(http:.+@@)/
+      when /^(https:.+@@)/
         Regexp.last_match[1] + '.jpg'
-      when /^(http:.+?)\.[^\/]+$/
+      when /^(https:.+?)\.[^\/]+$/
         Regexp.last_match[1] + '.jpg'
       end
     end
