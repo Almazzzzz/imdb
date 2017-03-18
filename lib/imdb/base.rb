@@ -41,27 +41,51 @@ module Imdb
     end
 
     # Returns the name of the director
+    # Deprecated
     def director
       document.search("h5[text()^='Director'] ~ div a").map { |link| link.content.strip } rescue []
     end
 
+    # Deprecated
     def director_id
       document.search("h5[text()^='Director'] ~ div a").map { |link| link['href'].sub(%r{^/name/(.*)/}, '\1') } rescue []
+    end
+
+    def directors
+      ids = document.xpath("//*[@id=\"tn15content\"]/table[1]//a").map { |link| link.content.strip if link['href'].include?('nm') } rescue []
+      ids.select { |i| (!i.nil?) }
+    end
+    
+    def director_ids
+      ids = []
+      ids = document.xpath("//*[@id=\"tn15content\"]/table[1]//a").map { |link| link['href'].sub(%r{^/name/(.*)/}, '\1') } rescue []
+      ids.select { |i| (!i.nil? && i.include?('nm')) }
     end
 
     # Returns the names of Writers
     def writers
-      writers_list = []
-
-      fullcredits_document.search("h4[text()^='Writing Credits'] + table tbody tr td[class='name']").each_with_index do |name, i|
-        writers_list[i] = name.content.strip unless writers_list.include? name.content.strip
+      names = []
+      document.xpath("//*[@id=\"tn15content\"]/table[2]//a").each do |name| 
+        names << name.content.strip if name['href'].include?('nm') && !names.include?(name.content.strip)
       end rescue []
+      names
 
-      writers_list
+      # writers_list = []
+
+      # fullcredits_document.search("h4[text()^='Writing Credits'] + table tbody tr td[class='name']").each_with_index do |name, i|
+      #   writers_list[i] = name.content.strip unless writers_list.include? name.content.strip
+      # end rescue []
+
+      # writers_list
     end
 
-    def director_id
-      document.search("h5[text()^='Director'] ~ div a").map { |link| link['href'].sub(%r{^/name/(.*)/}, '\1') } rescue []
+    def writer_ids
+      ids = []
+      document.xpath("//*[@id=\"tn15content\"]/table[2]//a").each do |link| 
+        person_id = link['href'].sub(%r{^/name/(.*)/}, '\1')
+        ids << person_id if person_id.include?('nm') && !ids.include?(person_id)
+      end rescue []
+      ids
     end
     
     # Returns the url to the "Watch a trailer" page
@@ -201,6 +225,10 @@ module Imdb
     
     def criticreviews_document
       @criticreviews_document ||= Nokogiri::HTML(Imdb::Movie.find_by_id(@id, 'criticreviews'))
+    end
+
+    def main_document
+      @criticreviews_document ||= Nokogiri::HTML(Imdb::Movie.find_by_id(@id, ''))
     end
     
     # Use HTTParty to fetch the raw HTML for this movie.
