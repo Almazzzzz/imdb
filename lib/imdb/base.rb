@@ -151,9 +151,9 @@ module Imdb
     end
     
     # Returns an int containing the Metascore
-    def metascore
-      criticreviews_document.at('//span[@itemprop="ratingValue"]').content.to_i rescue nil
-    end
+    # def metascore
+    #   criticreviews_document.at('//span[@itemprop="ratingValue"]').content.to_i rescue nil
+    # end
 
     # Returns an int containing the number of user ratings
     def votes
@@ -203,6 +203,16 @@ module Imdb
         }
       end rescue []
     end
+    #title-overview-widget > div.vital > div.title_block > div > div.titleBar > div.title_wrapper > div > meta
+
+    def metascore
+      score = main_document.search(".metacriticScore").text.strip rescue nil
+      (score.nil? || score.empty?) ? nil : score.to_i
+    end
+
+    def content_rating
+      main_document.search('meta[@itemprop="contentRating"]') rescue nil
+    end
 
     private
 
@@ -228,7 +238,7 @@ module Imdb
     end
 
     def main_document
-      @criticreviews_document ||= Nokogiri::HTML(Imdb::Movie.find_by_id(@id, ''))
+      @main_document ||= sleep(2) && Nokogiri::HTML(Imdb::Movie.find_by_id(@id, ''))
     end
     
     # Use HTTParty to fetch the raw HTML for this movie.
