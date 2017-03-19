@@ -211,7 +211,9 @@ module Imdb
     end
 
     def content_rating
-      main_document.search('meta[@itemprop="contentRating"]') rescue nil
+      main_document.search('meta[@itemprop="contentRating"]')[0]["content"] rescue nil
+      # main_document.search('div.title_wrapper')
+      # main_document.xpath("//[@itemprop]")
     end
 
     private
