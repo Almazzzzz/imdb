@@ -87,6 +87,75 @@ module Imdb
       end rescue []
       ids
     end
+
+    def producers
+      producers_list = []
+      rows = document.xpath("//*[@id=\"tn15content\"]/table[3]")
+      # puts "Row 0:"
+      # puts rows.class
+      # puts rows.at_xpath("tr[0]//td")
+      # puts "Rows"
+      rows.xpath("tr").each_with_index do |row, index|
+        if index == 0 
+          # puts "String: #{row.css("td h5 a").text.strip.downcase}"
+          return [] if !row.css("td h5 a").text.strip.downcase.include?("produced")
+          # puts "Header!" 
+          next
+        else
+          # puts "Not Header!"
+          # cells = row.css("td").each do |cell|
+          #   puts cell
+          # end
+          name        = row.css("td")[0].text.strip rescue nil
+          id          = row.css("td")[0].css("a").attr("href").to_s.sub(%r{^/name/(.*)/}, '\1') rescue nil
+          description = row.css("td")[2].text.strip rescue nil
+          if name && id && description
+            producers_list << { id: id, name: name, description: description, sort: index }
+          end
+        end
+      end rescue []
+      producers_list
+    end
+
+    def musicians 
+      musicians_list = []
+      rows = document.xpath("//*[@id=\"tn15content\"]/table[4]")
+      rows.xpath("tr").each_with_index do |row, index|
+        if index == 0 
+          return [] if !row.css("td h5 a").text.strip.downcase.include?("music by")
+          next
+        else
+          name        = row.css("td")[0].text.strip rescue nil
+          id          = row.css("td")[0].css("a").attr("href").to_s.sub(%r{^/name/(.*)/}, '\1') rescue nil
+          description = row.css("td")[2].text.strip rescue nil
+          if name && id && description
+            musicians_list << { id: id, name: name, description: description, sort: index }
+          end
+        end
+      end rescue []
+      musicians_list
+    end
+
+    def cinematographers
+      cinematographers_list = []
+      rows = document.xpath("//*[@id=\"tn15content\"]/table[5]")
+      rows.xpath("tr").each_with_index do |row, index|
+        if index == 0 
+          return [] if !row.css("td h5 a").text.strip.downcase.include?("cinematography by")
+          next
+        else
+          name        = row.css("td")[0].text.strip rescue nil
+          id          = row.css("td")[0].css("a").attr("href").to_s.sub(%r{^/name/(.*)/}, '\1') rescue nil
+          description = row.css("td")[2].text.strip rescue nil
+          if name && id && description
+            cinematographers_list << { id: id, name: name, description: description, sort: index }
+          end
+        end
+      end rescue []
+      cinematographers_list      
+    end
+
+
     
     # Returns the url to the "Watch a trailer" page
     def trailer_url
