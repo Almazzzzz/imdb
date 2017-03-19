@@ -154,7 +154,25 @@ module Imdb
       end rescue []
       cinematographers_list      
     end
-
+    
+    def film_editors 
+      film_editors_list = []
+      rows = document.xpath("//*[@id=\"tn15content\"]/table[6]")
+      rows.xpath("tr").each_with_index do |row, index|
+        if index == 0 
+          return [] if !row.css("td h5 a").text.strip.downcase.include?("editing by")
+          next
+        else
+          name        = row.css("td")[0].text.strip rescue nil
+          id          = row.css("td")[0].css("a").attr("href").to_s.sub(%r{^/name/(.*)/}, '\1') rescue nil
+          description = row.css("td")[2].text.strip rescue nil
+          if name && id && description
+            film_editors_list << { id: id, name: name, description: description, sort: index }
+          end
+        end
+      end rescue []
+      film_editors_list
+    end
 
     
     # Returns the url to the "Watch a trailer" page
