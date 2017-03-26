@@ -309,17 +309,29 @@ module Imdb
     end
 
     def gross_usa
+      @gross_usa = nil
       business_document.xpath("//*[@id=\"tn15content\"]/h5[text()='Gross']/following-sibling::text()").map do |row|
-        @gross_usa = currency_to_number(row.to_s.strip.match(/\$[0-9,]*/)) if row.to_s.downcase.include?("usa") && !@gross_usa 
-        break if @gross_usa
+        usa = currency_to_number(row.to_s.strip.match(/\$[0-9,]*/)) if row.to_s.downcase.include?("usa")
+        next if !usa
+        if !@gross_usa
+          @gross_usa = usa
+        elsif @gross_usa && @gross_usa < usa
+          @gross_usa = usa
+        end
       end
       return @gross_usa
     end
 
     def gross_worldwide
+      @gross_worldwide = nil
       business_document.xpath("//*[@id=\"tn15content\"]/h5[text()='Gross']/following-sibling::text()").map do |row|
-        @gross_worldwide = currency_to_number(row.to_s.strip.match(/\$[0-9,]*/)) if row.to_s.downcase.include?("worldwide") && !@gross_worldwide
-        break if @gross_worldwide
+        worldwide = currency_to_number(row.to_s.strip.match(/\$[0-9,]*/)) if row.to_s.downcase.include?("worldwide")
+        next if !worldwide
+        if !@gross_worldwide
+          @gross_worldwide = worldwide
+        elsif @gross_worldwide && @gross_worldwide < worldwide
+          @gross_worldwide = worldwide
+        end
       end
       return @gross_worldwide
     end
