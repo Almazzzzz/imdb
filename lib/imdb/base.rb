@@ -309,7 +309,8 @@ module Imdb
     end
 
     def gross_usa
-      @gross_usa = nil
+      # @gross_usa = nil
+      return @gross_usa if @gross_usa
       business_document.xpath("//*[@id=\"tn15content\"]/h5[text()='Gross']/following-sibling::text()").map do |row|
         usa = currency_to_number(row.to_s.strip.match(/\$[0-9,]*/)) if row.to_s.downcase.include?("usa")
         next if !usa
@@ -323,17 +324,62 @@ module Imdb
     end
 
     def gross_worldwide
-      @gross_worldwide = nil
-      business_document.xpath("//*[@id=\"tn15content\"]/h5[text()='Gross']/following-sibling::text()").map do |row|
+      
+      ## Create array of the strings.
+      # strings = []
+      # nodes = business_document.xpath("//*[@id=\"tn15content\"]/h5[text()='Gross']/following-sibling::text()") & business_document.xpath("//*[@id=\"tn15content\"]/h5[text()='Weekend Gross']/preceding-sibling::text()")     
+      
+      # nodes.each_with_index do |row, index|
+      #   str = row.to_s.strip.downcase.delete(")").delete("(")
+      #   next if str.empty?
+      #   if str.present? && str.include?("except")
+      #     strings[index-2] = strings[index-2] + str
+      #   else
+      #     strings[index] = str
+      #   end
+      # end
+      # puts strings.compact
+      ## The end of the array of the strings
+
+      # Alternative way to get array of the elements
+      rows = business_document.to_s.split("<h5>Gross</h5>")[1].split("<h5>Weekend Gross</h5>")[0].split("<br>")
+
+      rows.map do |row|
         worldwide = currency_to_number(row.to_s.strip.match(/\$[0-9,]*/)) if row.to_s.downcase.include?("worldwide")
         next if !worldwide
+        # puts row
+        if row.to_s.downcase.include?("except us")
+          worldwide = worldwide + gross_usa
+        end        
         if !@gross_worldwide
           @gross_worldwide = worldwide
         elsif @gross_worldwide && @gross_worldwide < worldwide
           @gross_worldwide = worldwide
         end
       end
+
       return @gross_worldwide
+
+      ## The first implementation
+      #
+      # return @gross_worldwide if @gross_worldwide
+      # nodes = business_document.xpath("//*[@id=\"tn15content\"]/h5[text()='Gross']/following-sibling") & business_document.xpath("//*[@id=\"tn15content\"]/h5[text()='Weekend Gross']/preceding-sibling")
+      # # business_document.xpath("//*[@id=\"tn15content\"]/h5[text()='Gross']/following-sibling::text()").map do |row|
+      # nodes.map do |row|
+      #   puts row
+      #   worldwide = currency_to_number(row.to_s.strip.match(/\$[0-9,]*/)) if row.to_s.downcase.include?("worldwide")
+      #   next if !worldwide
+      #   # puts row
+      #   if row.to_s.downcase.include?("except us")
+      #     worldwide = worldwide + gross_usa
+      #   end        
+      #   if !@gross_worldwide
+      #     @gross_worldwide = worldwide
+      #   elsif @gross_worldwide && @gross_worldwide < worldwide
+      #     @gross_worldwide = worldwide
+      #   end
+      # end
+      # return @gross_worldwide
     end
 
     private
