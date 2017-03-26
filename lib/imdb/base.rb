@@ -342,7 +342,10 @@ module Imdb
       ## The end of the array of the strings
 
       # Alternative way to get array of the elements
-      rows = business_document.to_s.split("<h5>Gross</h5>")[1].split("<h5>Weekend Gross</h5>")[0].split("<br>")
+      rows = []
+      strings = business_document.to_s&.split("<h5>Gross</h5>")[1] if business_document.to_s&.split("<h5>Gross</h5>")
+      strings = strings.split("<h5>Weekend Gross</h5>")[0] if strings && strings.split("<h5>Weekend Gross</h5>") 
+      rows = strings.split("<br>") if strings
 
       rows.map do |row|
         worldwide = currency_to_number(row.to_s.strip.match(/\$[0-9,]*/)) if row.to_s.downcase.include?("worldwide")
