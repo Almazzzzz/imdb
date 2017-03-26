@@ -352,7 +352,7 @@ module Imdb
       end
 
       def main_document
-        @main_document ||= sleep(1) && Nokogiri::HTML(Imdb::Movie.find_by_id(@id, ''))
+        @main_document ||= sleep(2) && Nokogiri::HTML(Imdb::Movie.find_by_id(@id, ''))
       end
       
       # Use HTTParty to fetch the raw HTML for this movie.
