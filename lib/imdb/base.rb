@@ -308,6 +308,22 @@ module Imdb
       currency_to_number(main_document.at("h4[text()*='Budget:']").parent.content.strip.match(/\$[0-9,]*/)) rescue nil
     end
 
+    def gross_usa
+      business_document.xpath("//*[@id=\"tn15content\"]/h5[text()='Gross']/following-sibling::text()").map do |row|
+        @gross_usa = currency_to_number(row.to_s.strip.match(/\$[0-9,]*/)) if row.to_s.downcase.include?("usa") && !@gross_usa 
+        break if @gross_usa
+      end
+      return @gross_usa
+    end
+
+    def gross_worldwide
+      business_document.xpath("//*[@id=\"tn15content\"]/h5[text()='Gross']/following-sibling::text()").map do |row|
+        @gross_worldwide = currency_to_number(row.to_s.strip.match(/\$[0-9,]*/)) if row.to_s.downcase.include?("worldwide") && !@gross_worldwide
+        break if @gross_worldwide
+      end
+      return @gross_worldwide
+    end
+
     private
 
       # Returns a new Nokogiri document for parsing.
@@ -329,6 +345,10 @@ module Imdb
       
       def criticreviews_document
         @criticreviews_document ||= Nokogiri::HTML(Imdb::Movie.find_by_id(@id, 'criticreviews'))
+      end
+
+      def business_document
+        @business_document ||= sleep(1) && Nokogiri::HTML(Imdb::Movie.find_by_id(@id, 'business'))
       end
 
       def main_document
