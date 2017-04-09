@@ -17,3 +17,8 @@ require 'imdb/series_top_list'
 require 'imdb/box_office'
 require 'imdb/string_extensions'
 require 'imdb/version'
+
+
+require 'imdb/person_base'
+require 'imdb/person'
+require 'imdb/person_list'
