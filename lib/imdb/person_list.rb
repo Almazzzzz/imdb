@@ -14,10 +14,11 @@ module Imdb
     private
 
       def parse_people
-        document.search("a[@href^='/name/nm']").reject do |element|
+        document.search(".name > a[@href^='/name/nm']").reject do |element|
           element.inner_html.imdb_strip_tags.empty? ||
-          element.inner_html.imdb_strip_tags == 'X' ||
-          element.parent.inner_html =~ /media from/i
+          element.inner_html.imdb_strip_tags == 'X'
+          # element.parent.class =~ /bio/i
+          # puts element
         end.map do |element|
           # puts element
           id = element['href'][/\d+/]
