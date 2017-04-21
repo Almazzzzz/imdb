@@ -1,7 +1,7 @@
 module Imdb
   # Represents something on IMDB.com
   class PersonBase
-    attr_accessor :id, :url, :name, :gender, :birthdate
+    attr_accessor :id, :url, :name, :gender, :birthdate, :birth_year
 
     # Initialize a new IMDB movie object with it's IMDB id (as a String)
     #
@@ -22,12 +22,66 @@ module Imdb
       end
     end
 
+    # Returns a string containing the URL to the movie poster.
+    def poster
+      src = document.at("img[@id='name-poster']")['src'] rescue nil
+      case src
+      when /^(https:.+@@)/
+        Regexp.last_match[1] + '.jpg'
+      when /^(https:.+?)\.[^\/]+$/
+        Regexp.last_match[1] + '.jpg'
+      end
+    end
+
+    # Returns a string containing the name
+    def name(force_refresh = false)
+      if @name && !force_refresh
+        @name
+      else
+        # puts "String: #{document.at("h1 span[@itemprop='name']").text}"
+        @name = document.at("h1 span[@itemprop='name']").text.strip.imdb_unescape_html rescue nil
+        # @title = document.at('h1').inner_html.split('<span').first.strip.imdb_unescape_html rescue nil
+      end
+    end
+
+    def birthdate
+      birthdate = document.at("time[@itemprop='birthDate']")['datetime'].strip.imdb_unescape_html rescue nil
+      
+      if birthdate
+        @birth_year = birthdate[0..3].to_i
+        @birthdate = birthdate.to_date rescue nil
+      else
+        return nil
+      end
+    end
+
+    def birth_year
+      return @birth_year if @birth_year
+      @birth_year = document.at("time[@itemprop='birthDate']")['datetime'].strip.imdb_unescape_html[0..3] rescue nil
+    end
+
+    def birth_place
+      document.at("#name-born-info a[@href*='/search/name?birth_place']").text.strip.imdb_unescape_html rescue nil
+    end
+
+    def nickname
+      document.at("#dyk-nickname h4").next_sibling.text.strip.imdb_unescape_html rescue nil
+    end
+    
+    def alternate_names
+      # Save just first alternate name from this string: Alternate Names: Malcolm I. Barrett | Verbal the Rapper
+      document.at("#details-akas h4").next_sibling.text.strip.imdb_unescape_html rescue nil
+    end
+
+    def height
+      (document.at("#details-height h4").next_sibling.text.strip.imdb_unescape_html.match(/\d+.\d+/).to_s.to_f * 100).to_i rescue nil
+    end
 
     private
 
       # Returns a new Nokogiri document for parsing.
       def document
-        @document ||= Nokogiri::HTML(Imdb::Movie.find_by_id(@id))
+        @document ||= Nokogiri::HTML(Imdb::Person.find_by_id(@id))
       end
 
       def locations_document
@@ -55,8 +109,10 @@ module Imdb
       end
       
       # Use HTTParty to fetch the raw HTML for this movie.
-      def self.find_by_id(imdb_id, page = :combined)
-        open("http://akas.imdb.com/title/tt#{imdb_id}/#{page}", "Accept-Language" => "en")
+      def self.find_by_id(imdb_id, page = nil)
+        # Remove nm part from imdb_id if it exists
+        imdb_id = imdb_id.sub(/^nm/, '')
+        open("http://akas.imdb.com/name/nm#{imdb_id}", "Accept-Language" => "en")
       end
 
       # Convenience method for search
