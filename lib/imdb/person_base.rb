@@ -44,6 +44,11 @@ module Imdb
       end
     end
 
+    def regnal_number
+      #overview-top > h1 > span:nth-child(2)
+      document.at("h1 > span:nth-child(2)").text.strip.imdb_unescape_html.delete('()') rescue nil
+    end
+
     def birthdate
       birthdate = document.at("time[@itemprop='birthDate']")['datetime'].strip.imdb_unescape_html rescue nil
       
