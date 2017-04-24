@@ -73,8 +73,9 @@ module Imdb
     end
     
     def alternate_names
+      document.at("#details-akas").text.gsub(/Alternate Names:/, '').strip.imdb_unescape_html.split("|").map {|s| s.strip }.join(", ") rescue nil
       # Save just first alternate name from this string: Alternate Names: Malcolm I. Barrett | Verbal the Rapper
-      document.at("#details-akas h4").next_sibling.text.strip.imdb_unescape_html rescue nil
+      # document.at("#details-akas h4").next_sibling.text.strip.imdb_unescape_html rescue nil
     end
 
     def height
