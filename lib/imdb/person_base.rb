@@ -55,6 +55,10 @@ module Imdb
       end
     end
 
+    def deathdate
+      deathdate = document.at("time[@itemprop='deathDate']")['datetime'].strip.imdb_unescape_html rescue nil      
+    end
+
     def birth_year
       return @birth_year if @birth_year
       @birth_year = document.at("time[@itemprop='birthDate']")['datetime'].strip.imdb_unescape_html[0..3] rescue nil
