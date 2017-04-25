@@ -46,7 +46,7 @@ module Imdb
 
     def regnal_number
       #overview-top > h1 > span:nth-child(2)
-      document.at("h1 > span:nth-child(2)").text.strip.imdb_unescape_html.delete('()') rescue nil
+      document.at("h1 > span:nth-child(2)").text.strip.imdb_unescape_html.delete('()').match(/[A-Z]{1,}/) rescue nil
     end
 
     def birthdate
