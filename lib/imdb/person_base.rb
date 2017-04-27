@@ -61,7 +61,7 @@ module Imdb
     end
 
     def deathdate
-      deathdate = document.at("time[@itemprop='deathDate']")['datetime'].strip.imdb_unescape_html rescue nil      
+      deathdate = document.at("time[@itemprop='deathDate']")['datetime'].strip.imdb_unescape_html.to_date rescue nil      
     end
 
     def birth_year
